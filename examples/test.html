@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DevLens test page</title>
+    <style>
+      body { font-family: sans-serif; margin: 32px; }
+      .btn { padding: 8px 16px; }
+      .primary { background: #0b57d0; color: #fff; border: 0; }
+      .large { font-size: 16px; }
+      svg { margin-top: 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>DevLens fixtures</h1>
+    <p>Load the unpacked extension, then use these elements.</p>
+
+    <h2>Unique ID</h2>
+    <button id="submit-btn">Submit</button>
+
+    <h2>Duplicate classes</h2>
+    <button class="btn">A</button>
+    <button class="btn">B</button>
+
+    <h2>Nested</h2>
+    <div>
+      <form>
+        <div>
+          <button>Submit</button>
+        </div>
+      </form>
+    </div>
+
+    <h2>Multiple classes</h2>
+    <button class="btn primary large">Submit</button>
+
+    <h2>SVG</h2>
+    <svg width="80" height="80" viewBox="0 0 80 80">
+      <circle id="lens" cx="40" cy="40" r="24" fill="#5eb1ff" />
+      <rect x="10" y="10" width="20" height="12" fill="#111" />
+    </svg>
+  </body>
+</html>

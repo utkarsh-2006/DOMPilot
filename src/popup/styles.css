@@ -1,0 +1,112 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  width: 280px;
+  background: #0f1218;
+  color: #e8eaed;
+  font: 12.5px/1.4 ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+}
+
+main {
+  padding: 12px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+header p {
+  margin: 4px 0 0;
+  color: #8b93a2;
+}
+
+button {
+  appearance: none;
+  background: #1a2030;
+  color: #d7dce5;
+  border: 1px solid #323846;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: #5eb1ff;
+  color: #fff;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.inspect {
+  display: block;
+  width: 100%;
+  margin: 12px 0 10px;
+  padding: 8px 10px;
+  background: #17324d;
+  border-color: #2f6fa3;
+  color: #d6ebff;
+  font-weight: 600;
+}
+
+section h2 {
+  margin: 0 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8b93a2;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid #1c212b;
+}
+
+.row span {
+  color: #c5cad3;
+}
+
+.row button {
+  padding: 3px 8px;
+  font-size: 11px;
+}
+
+.target {
+  margin: 6px 0 0;
+  color: #8b93a2;
+  font-size: 11px;
+}
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: #d2d8e2;
+}
+
+.status {
+  margin: 8px 0 0;
+  color: #b6f0c8;
+  font-size: 11px;
+}
+
+footer {
+  margin-top: 12px;
+  color: #6d7482;
+  font-size: 10px;
+}
