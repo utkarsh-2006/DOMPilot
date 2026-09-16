@@ -2,17 +2,17 @@ import { sendToTab } from "../shared/bridge";
 import type { RuntimeMessage } from "../shared/types";
 
 const MENU = {
-  root: "devlens",
-  selector: "devlens-copy-selector",
-  xpath: "devlens-copy-xpath",
-  inspect: "devlens-inspect",
+  root: "dompilot",
+  selector: "dompilot-copy-selector",
+  xpath: "dompilot-copy-xpath",
+  inspect: "dompilot-inspect",
 } as const;
 
 function createMenus(): void {
   chrome.contextMenus.removeAll(() => {
     chrome.contextMenus.create({
       id: MENU.root,
-      title: "DevLens",
+      title: "DOMPilot",
       contexts: ["all"],
     });
     chrome.contextMenus.create({

@@ -35,7 +35,7 @@ export async function sendToTab(
     } catch {
       return {
         ok: false,
-        error: "DevLens cannot run on this page. Open a normal http(s) tab and try again.",
+        error: "DOMPilot cannot run on this page. Open a normal http(s) tab and try again.",
       };
     }
   }

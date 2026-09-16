@@ -1,4 +1,4 @@
-import type { PickerMode, Snapshot } from "../shared/types";
+import type { PickerMode } from "../shared/types";
 import { copyText, escapeHtml, snapshotFor } from "./inspector";
 import {
   isOverlayEvent,
@@ -7,8 +7,10 @@ import {
   positionTooltip,
   removeOverlay,
   showToast,
-  type OverlayEls,
 } from "./overlay";
+import { renderPanel } from "./panel";
+
+const HOST_ID = "__dompilot_host";
 
 type Session = {
   mode: PickerMode;
@@ -31,7 +33,7 @@ export function getLastTarget(): Element | null {
 function elementFromPoint(x: number, y: number): Element | null {
   const stack = document.elementsFromPoint(x, y);
   for (const node of stack) {
-    if (node.id === "__devlens_host") continue;
+    if (node.id === HOST_ID) continue;
     if (node instanceof Element) return node;
   }
   return null;
@@ -45,70 +47,15 @@ function tooltipHtml(el: Element): string {
     <span class="meta"> ${escapeHtml(cls)} · ${snap.width}×${snap.height}</span>`;
 }
 
-function bindCopy(root: HTMLElement, selected: Element): void {
-  root.querySelectorAll<HTMLButtonElement>("[data-copy]").forEach((button) => {
-    button.addEventListener("click", async (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      const key = button.dataset.copy ?? "";
-      const snap = snapshotFor(selected);
-      const map: Record<string, { value: string; label: string }> = {
-        selector: { value: snap.selector, label: "CSS selector copied" },
-        xpath: { value: snap.xpath, label: "XPath copied" },
-        id: { value: snap.id, label: "ID copied" },
-        classes: { value: snap.classes.join(" "), label: "Classes copied" },
-        text: { value: snap.text, label: "Text copied" },
-        html: { value: snap.html, label: "HTML copied" },
-      };
-      const item = map[key];
-      if (!item?.value) return;
-      await copyText(item.value);
-      showToast(`✓ ${item.label}`);
-    });
-  });
-}
-
-function renderPanel(overlay: OverlayEls, el: Element): void {
-  const snap = snapshotFor(el);
-  overlay.panel.style.display = "block";
-  overlay.panel.innerHTML = `
-    <header>
-      <strong>DevLens</strong>
-      <span class="hint">Esc to close</span>
-    </header>
-    <div class="rows">
-      <div class="row">
-        <div class="label">Element</div>
-        <div class="value mono">${escapeHtml(snap.tagName)}</div>
-      </div>
-      <div class="row">
-        <div class="label">ID ${snap.id ? `<button type="button" data-copy="id">Copy</button>` : ""}</div>
-        <div class="value mono">${snap.id ? escapeHtml(snap.id) : "—"}</div>
-      </div>
-      <div class="row">
-        <div class="label">Classes ${snap.classes.length ? `<button type="button" data-copy="classes">Copy</button>` : ""}</div>
-        <div class="value mono">${snap.classes.length ? escapeHtml(snap.classes.join(" ")) : "—"}</div>
-      </div>
-      <div class="row">
-        <div class="label">Text ${snap.text ? `<button type="button" data-copy="text">Copy</button>` : ""}</div>
-        <div class="value">${snap.text ? escapeHtml(snap.text) : "—"}</div>
-      </div>
-      <div class="row">
-        <div class="label">Size</div>
-        <div class="value mono">${snap.width} × ${snap.height}</div>
-      </div>
-      <div class="row">
-        <div class="label">CSS selector <button type="button" data-copy="selector">Copy</button></div>
-        <div class="value mono">${escapeHtml(snap.selector)}</div>
-      </div>
-      <div class="row">
-        <div class="label">XPath <button type="button" data-copy="xpath">Copy</button></div>
-        <div class="value mono">${escapeHtml(snap.xpath)}</div>
-      </div>
-    </div>
-    <button type="button" class="primary" data-copy="html">Copy HTML</button>
-  `;
-  bindCopy(overlay.panel, el);
+function selectElement(el: Element): void {
+  if (!session) return;
+  lastTarget = el;
+  session.selected = el;
+  session.hovered = el;
+  const overlay = mountOverlay();
+  overlay.tooltip.style.display = "none";
+  positionHighlight(el, overlay.highlight);
+  renderPanel(overlay, el, stopPicker, selectElement);
 }
 
 function onMove(event: MouseEvent): void {
@@ -147,11 +94,7 @@ async function onClick(event: MouseEvent): Promise<void> {
     return;
   }
 
-  session.selected = el;
-  const overlay = mountOverlay();
-  overlay.tooltip.style.display = "none";
-  positionHighlight(el, overlay.highlight);
-  renderPanel(overlay, el);
+  selectElement(el);
 }
 
 function onKey(event: KeyboardEvent): void {
@@ -186,13 +129,7 @@ export function startPicker(mode: PickerMode): void {
 export function inspectElement(el: Element): void {
   lastTarget = el;
   startPicker("inspect");
-  if (!session) return;
-  session.selected = el;
-  session.hovered = el;
-  const overlay = mountOverlay();
-  overlay.tooltip.style.display = "none";
-  positionHighlight(el, overlay.highlight);
-  renderPanel(overlay, el);
+  selectElement(el);
 }
 
 export function stopPicker(): void {
@@ -205,7 +142,7 @@ export function stopPicker(): void {
   removeOverlay();
 }
 
-export function getLastSnapshot(): Snapshot | null {
+export function getLastSnapshot() {
   const el = getLastTarget();
   return el ? snapshotFor(el) : null;
 }

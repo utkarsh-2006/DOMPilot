@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "DevLens",
-  "version": "1.0.0",
-  "description": "Right-click any element to copy its CSS selector, XPath, or inspect it locally.",
+  "name": "DOMPilot",
+  "version": "2.0.0",
+  "description": "Inspect any element. Get selectors, HTML, styles, attributes, and DOM context instantly.",
   "permissions": ["contextMenus", "activeTab", "scripting"],
   "background": {
     "service_worker": "src/background/service-worker.ts",
@@ -10,7 +10,7 @@
   },
   "action": {
     "default_popup": "src/popup/index.html",
-    "default_title": "DevLens",
+    "default_title": "DOMPilot",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",

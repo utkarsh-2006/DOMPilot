@@ -1,9 +1,9 @@
 {
-  "name": "dev-lens",
-  "version": "1.0.0",
+  "name": "dompilot",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
-  "description": "Lightweight Chrome extension for inspecting page elements.",
+  "description": "Lightweight Chrome extension for inspecting page elements locally.",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

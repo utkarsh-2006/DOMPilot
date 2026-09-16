@@ -38,11 +38,13 @@ const ATTR_CANDIDATES = [
   "data-test",
   "data-cy",
   "name",
-  "aria-label",
-  "placeholder",
-  "title",
-  "alt",
   "role",
+  "aria-label",
+  "href",
+  "type",
+  "title",
+  "placeholder",
+  "alt",
 ] as const;
 
 function attrXPath(el: Element): string | null {

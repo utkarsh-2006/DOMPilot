@@ -37,8 +37,8 @@ export function App() {
   return (
     <main>
       <header>
-        <h1>DevLens</h1>
-        <p>Inspect a page element without opening DevTools.</p>
+        <h1>DOMPilot</h1>
+        <p>Inspect any element. Get selectors, HTML, styles, attributes, and DOM context instantly.</p>
       </header>
 
       <button
@@ -71,7 +71,7 @@ export function App() {
 
       {status ? <p className="status">{status}</p> : null}
 
-      <footer>v1.0.0 · local only</footer>
+      <footer>v2.0.0 · local only</footer>
     </main>
   );
 }

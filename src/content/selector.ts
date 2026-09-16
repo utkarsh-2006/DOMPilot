@@ -1,17 +1,26 @@
 const UNSTABLE_CLASS =
   /^(css-|sc-|s-|_|is-animat)|^[a-z]{1,3}-[a-f0-9]{5,}$|[a-f0-9]{8,}|^svelte-|^emotion-|^jsx-/i;
 
-function uniqueMatches(root: ParentNode, selector: string, el: Element): boolean {
-  try {
-    const found = root.querySelectorAll(selector);
-    return found.length === 1 && found[0] === el;
-  } catch {
-    return false;
-  }
+const ATTR_CANDIDATES = [
+  "data-testid",
+  "data-test",
+  "data-cy",
+  "name",
+  "role",
+  "aria-label",
+  "href",
+  "type",
+  "title",
+  "placeholder",
+  "alt",
+] as const;
+
+function tag(el: Element): string {
+  return el.localName || el.tagName.toLowerCase();
 }
 
-function isUniqueOnPage(selector: string, el: Element): boolean {
-  return uniqueMatches(el.ownerDocument, selector, el);
+function cssAttrValue(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 function stableClasses(el: Element): string[] {
@@ -23,42 +32,39 @@ function stableClasses(el: Element): string[] {
   });
 }
 
-function tag(el: Element): string {
-  return el.localName || el.tagName.toLowerCase();
+function resolvesToElement(selector: string, el: Element): boolean {
+  try {
+    return el.ownerDocument.querySelector(selector) === el;
+  } catch {
+    return false;
+  }
 }
 
-function cssId(el: Element): string | null {
+function isUniqueOnPage(selector: string, el: Element): boolean {
+  try {
+    const found = el.ownerDocument.querySelectorAll(selector);
+    return found.length === 1 && found[0] === el;
+  } catch {
+    return false;
+  }
+}
+
+function idSelector(el: Element): string | null {
   const id = el.getAttribute("id");
   if (!id) return null;
   const selector = `#${CSS.escape(id)}`;
   return isUniqueOnPage(selector, el) ? selector : null;
 }
 
-const ATTR_CANDIDATES = [
-  "data-testid",
-  "data-test",
-  "data-cy",
-  "name",
-  "aria-label",
-  "placeholder",
-  "title",
-  "alt",
-  "role",
-] as const;
-
 function attrSelector(el: Element): string | null {
   const t = tag(el);
   for (const name of ATTR_CANDIDATES) {
     const value = el.getAttribute(name);
-    if (!value || value.length > 80) continue;
+    if (!value || value.length > 120) continue;
     const selector = `${t}[${name}="${cssAttrValue(value)}"]`;
     if (isUniqueOnPage(selector, el)) return selector;
   }
   return null;
-}
-
-function cssAttrValue(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 function classSelector(el: Element): string | null {
@@ -69,6 +75,8 @@ function classSelector(el: Element): string | null {
     const selector = `${t}.${classes.slice(0, i).map(CSS.escape).join(".")}`;
     if (isUniqueOnPage(selector, el)) return selector;
   }
+  const shorthand = `.${classes.map(CSS.escape).join(".")}`;
+  if (isUniqueOnPage(shorthand, el)) return shorthand;
   return null;
 }
 
@@ -81,12 +89,44 @@ function nthOfType(el: Element): string {
   return `${t}:nth-of-type(${same.indexOf(el) + 1})`;
 }
 
+function hierarchicalSelector(el: Element): string | null {
+  let ancestor = el.parentElement;
+  while (ancestor) {
+    const anchor = idSelector(ancestor);
+    if (anchor) {
+      const classes = stableClasses(el);
+      const t = tag(el);
+
+      if (classes.length) {
+        for (let i = classes.length; i >= 1; i--) {
+          const combo = `${anchor} ${t}.${classes.slice(0, i).map(CSS.escape).join(".")}`;
+          if (resolvesToElement(combo, el)) return combo;
+        }
+        const combo = `${anchor} .${classes.map(CSS.escape).join(".")}`;
+        if (resolvesToElement(combo, el)) return combo;
+      }
+
+      for (const name of ATTR_CANDIDATES) {
+        const value = el.getAttribute(name);
+        if (!value || value.length > 120) continue;
+        const combo = `${anchor} ${t}[${name}="${cssAttrValue(value)}"]`;
+        if (resolvesToElement(combo, el)) return combo;
+      }
+
+      const combo = `${anchor} ${nthOfType(el)}`;
+      if (resolvesToElement(combo, el)) return combo;
+    }
+    ancestor = ancestor.parentElement;
+  }
+  return null;
+}
+
 function structuralSelector(el: Element): string {
   const parts: string[] = [];
   let current: Element | null = el;
 
   while (current && current.nodeType === 1) {
-    const id = cssId(current);
+    const id = idSelector(current);
     if (id) {
       parts.unshift(id);
       break;
@@ -107,14 +147,21 @@ function structuralSelector(el: Element): string {
 }
 
 export function cssSelector(el: Element): string {
-  const byId = cssId(el);
-  if (byId) return byId;
+  const candidates = [
+    idSelector(el),
+    attrSelector(el),
+    hierarchicalSelector(el),
+    classSelector(el),
+    structuralSelector(el),
+  ].filter((value): value is string => Boolean(value));
 
-  const byAttr = attrSelector(el);
-  if (byAttr) return byAttr;
-
-  const byClass = classSelector(el);
-  if (byClass) return byClass;
+  for (const selector of candidates) {
+    if (resolvesToElement(selector, el)) return selector;
+  }
 
   return structuralSelector(el);
+}
+
+export function jsSelector(css: string): string {
+  return `document.querySelector(${JSON.stringify(css)})`;
 }

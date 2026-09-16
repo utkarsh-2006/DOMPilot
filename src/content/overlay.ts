@@ -1,4 +1,4 @@
-const HOST_ID = "__devlens_host";
+const HOST_ID = "__dompilot_host";
 
 export type OverlayEls = {
   host: HTMLElement;
@@ -29,7 +29,7 @@ export function mountOverlay(): OverlayEls {
 
   const host = document.createElement("div");
   host.id = HOST_ID;
-  host.setAttribute("data-devlens", "true");
+  host.setAttribute("data-dompilot", "true");
   host.style.all = "initial";
   host.style.position = "fixed";
   host.style.zIndex = "2147483646";
@@ -47,7 +47,6 @@ export function mountOverlay(): OverlayEls {
         border: 1px solid #5eb1ff;
         background: rgba(94, 177, 255, 0.14);
         outline: 1px solid rgba(0, 0, 0, 0.45);
-        outline-offset: 0;
         display: none;
       }
       #tooltip, #toast, #panel {
@@ -86,15 +85,15 @@ export function mountOverlay(): OverlayEls {
         position: fixed;
         right: 12px;
         bottom: 12px;
-        width: 320px;
-        max-height: min(70vh, 520px);
-        overflow: auto;
+        width: 340px;
+        max-height: min(78vh, 560px);
         background: #0f1218;
         border: 1px solid #2a2f3a;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
         display: none;
         pointer-events: auto;
         z-index: 3;
+        overflow: hidden;
       }
       #panel header {
         display: flex;
@@ -103,10 +102,12 @@ export function mountOverlay(): OverlayEls {
         padding: 8px 10px;
         border-bottom: 1px solid #2a2f3a;
         font-size: 12px;
-        letter-spacing: 0.02em;
       }
-      #panel header strong { font-weight: 600; }
-      #panel header .hint { color: #8b93a2; font-size: 10px; }
+      #panel header strong { font-weight: 650; letter-spacing: 0.01em; }
+      .panel-scroll {
+        max-height: calc(min(78vh, 560px) - 36px);
+        overflow: auto;
+      }
       button {
         appearance: none;
         background: #1a2030;
@@ -118,29 +119,23 @@ export function mountOverlay(): OverlayEls {
         cursor: pointer;
       }
       button:hover { border-color: #5eb1ff; color: #fff; }
-      button.primary {
-        background: #17324d;
-        border-color: #2f6fa3;
-        color: #d6ebff;
-        padding: 7px 8px;
-        margin: 8px 10px 10px;
-        width: calc(100% - 20px);
+      button.close {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        line-height: 1;
+        font-size: 16px;
       }
-      .rows { padding: 6px 0 4px; }
-      .row {
-        padding: 6px 10px;
+      .block {
+        padding: 8px 10px;
         border-bottom: 1px solid #1c212b;
       }
-      .row:last-child { border-bottom: 0; }
       .label {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
         color: #8b93a2;
         font-size: 10px;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        margin-bottom: 3px;
+        margin-bottom: 4px;
       }
       .value {
         font-size: 12px;
@@ -150,7 +145,82 @@ export function mountOverlay(): OverlayEls {
         font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
         font-size: 11px;
         color: #d2d8e2;
+        overflow-wrap: anywhere;
       }
+      .element-title { font-size: 13px; color: #5eb1ff; }
+      .sub { margin-top: 2px; color: #9aa3b2; }
+      .selector-block {
+        margin-top: 6px;
+        padding: 6px;
+        background: #121722;
+        border: 1px solid #1f2531;
+      }
+      .selector-label {
+        color: #8b93a2;
+        font-size: 10px;
+        text-transform: uppercase;
+        margin-bottom: 3px;
+      }
+      .selector-block button { margin-top: 6px; }
+      .actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+      }
+      .actions button { flex: 1; padding: 6px 8px; }
+      .section {
+        border-bottom: 1px solid #1c212b;
+      }
+      .section summary {
+        list-style: none;
+        cursor: pointer;
+        padding: 8px 10px;
+        color: #8b93a2;
+        font-size: 10px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        user-select: none;
+      }
+      .section summary::-webkit-details-marker { display: none; }
+      .section summary::after {
+        content: "▶";
+        float: right;
+        color: #6d7482;
+        font-size: 9px;
+      }
+      .section[open] summary::after { content: "▼"; }
+      .section-body { padding: 0 10px 8px; }
+      .muted { color: #6d7482; font-size: 11px; margin: 0; }
+      .attr-row { margin-bottom: 6px; }
+      .attr-name { color: #8b93a2; font-size: 10px; text-transform: lowercase; }
+      .attr-value { font-size: 11px; word-break: break-word; }
+      .style-group { margin-bottom: 8px; }
+      .style-group-name {
+        color: #8b93a2;
+        font-size: 10px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .style-row {
+        display: grid;
+        grid-template-columns: 92px 1fr;
+        gap: 6px;
+        font-size: 11px;
+        margin-bottom: 3px;
+      }
+      .style-value { word-break: break-word; color: #d2d8e2; }
+      .crumb-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px;
+      }
+      .crumb {
+        padding: 2px 6px;
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 10px;
+      }
+      .crumb-sep { color: #6d7482; font-size: 10px; }
     </style>
     <div id="highlight"></div>
     <div id="tooltip"></div>
